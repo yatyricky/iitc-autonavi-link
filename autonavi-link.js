@@ -1,12 +1,12 @@
 // ==UserScript==
-// @id             iitc-plugin-gaode-link@Nefinite
-// @name           IITC plugin: Gaode Map Link
+// @id             iitc-plugin-autonavi-link@Nefinite
+// @name           IITC plugin: AutoNavi Map Link
 // @category       Portal Info
-// @version        0.0.1.20230513.1
+// @version        0.0.1.20230513.2
 // @namespace      https://github.com/jonatkins/ingress-intel-total-conversion
-// @updateURL      https://static.iitc.me/build/release/plugins/gaode-link.meta.js
-// @downloadURL    https://static.iitc.me/build/release/plugins/gaode-link.user.js
-// @description    [iitc-2023-05-13-1] Link to Gaode Map
+// @updateURL      https://static.iitc.me/build/release/plugins/autonavi-link.meta.js
+// @downloadURL    https://static.iitc.me/build/release/plugins/autonavi-link.user.js
+// @description    [iitc-2023-05-13-1] Link to AutoNavi Map
 // @include        https://*.ingress.com/intel*
 // @include        http://*.ingress.com/intel*
 // @match          https://*.ingress.com/intel*
@@ -26,54 +26,77 @@ function wrapper(plugin_info) {
     //PLUGIN AUTHORS: writing a plugin outside of the IITC build environment? if so, delete these lines!!
     //(leaving them in place might break the 'About IITC' page or break update checks)
     plugin_info.buildName = 'iitc';
-    plugin_info.dateTimeVersion = '20230513.1';
-    plugin_info.pluginId = 'gaode-link';
+    plugin_info.dateTimeVersion = '20230513.2';
+    plugin_info.pluginId = 'autonavi-link';
     //END PLUGIN AUTHORS NOTE
 
 
     // PLUGIN START ////////////////////////////////////////////////////////
 
     // use own namespace for plugin
-    window.plugin.gaodeLink = function () { };
+    window.plugin.autoNaviLink = function () { };
 
-    window.plugin.gaodeLink.appendGaodeLink = function () {
-        var div = $('<a>')
-            .attr({
-                id: 'gaode-link',
-            })
+    function generateAutoNaviLink(lat, lng, portalName) {
+        return `https://uri.amap.com/marker?position=${lng},${lat}&name=${portalName}&src=IITC-Mobile&coordinate=wgs84&callnative=1`
+    }
+
+    window.plugin.autoNaviLink.appendAutoNaviLink = function () {
+        let div = $("<div>")
+
+        var autoNaviLink = $('<a>').attr({ id: 'autonavi-link' }).text("[高德地图]")
+        div.append(autoNaviLink)
+
+        div.append($("<span>").text(" "))
+
+        let primeParser = $("<a>").attr({ id: "autonavi-prime" }).text("[解析游戏内链接]").click((evt) => {
+            let primeLink = prompt("Enter Prime Link")
+            let url = new URL(primeLink)
+            let ofl = url.searchParams.get("ofl")
+
+            const regex = /https:\/\/intel\.ingress\.com\/intel\?pll=(?<lat>[\d\.\-]+),(?<lng>[\d\.\-]+)/g;
+            let m = regex.exec(ofl);
+            if (m !== null) {
+                let group = m.groups
+                let link = generateAutoNaviLink(group.lat, group.lng, "Prime")
+                $('#autonavi-prime-link').attr({
+                    href: encodeURI(link),
+                    target: "_blank",
+                })
+                alert("按钮已更新")
+            } else {
+                alert("链接解析失败")
+            }
+            evt.stopPropagation();
+        })
+        let primeResult = $("<a>").attr({ id: "autonavi-prime-link" }).text("[解析结果]")
+        div.append(primeParser);
+        div.append($("<span>").text(" "))
+        div.append(primeResult)
 
         $('#resodetails').after(div);
 
-        window.plugin.gaodeLink.updateGaodeLink();
+        window.plugin.autoNaviLink.updateAutoNaviLink();
     };
 
-    window.plugin.gaodeLink.updateGaodeLink = function () {
+    window.plugin.autoNaviLink.updateAutoNaviLink = function () {
         if (!(selectedPortal && portals[selectedPortal])) return;
         var portal = portals[selectedPortal];
 
         var ll = portal.getLatLng();
         let portalName = portal.options.data.title
+        let link = generateAutoNaviLink(ll.lat, ll.lng, portalName)
 
-        let sourceApp = "IITC-Mobile"
-
-        let link
-        if (false && window.navigator.userAgent.indexOf("iPhone") >= 0) {
-            link = `iosamap://viewMap?sourceApplication=${sourceApp}&poiname=${portalName}&lat=${ll.lat}&lon=${ll.lng}&dev=1`
-        } else {
-            link = `https://uri.amap.com/marker?position=${ll.lng},${ll.lat}&name=${portalName}&src=${sourceApp}&coordinate=wgs84&callnative=1`
-        }
-
-        $('#gaode-link').text("高德地图").attr({
+        $('#autonavi-link').attr({
             href: encodeURI(link),
             target: "_blank",
         })
     };
 
-    window.plugin.gaodeLink.setup = function () {
-        addHook('portalDetailsUpdated', window.plugin.gaodeLink.appendGaodeLink);
+    window.plugin.autoNaviLink.setup = function () {
+        addHook('portalDetailsUpdated', window.plugin.autoNaviLink.appendAutoNaviLink);
     };
 
-    var setup = window.plugin.gaodeLink.setup;
+    var setup = window.plugin.autoNaviLink.setup;
 
     // PLUGIN END //////////////////////////////////////////////////////////
 
@@ -96,5 +119,3 @@ if (typeof GM_info !== 'undefined' && GM_info && GM_info.script) {
 }
 script.appendChild(document.createTextNode('(' + wrapper + ')(' + JSON.stringify(info) + ');'));
 (document.body || document.head || document.documentElement).appendChild(script);
-
-
