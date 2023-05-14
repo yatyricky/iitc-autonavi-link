@@ -40,10 +40,6 @@ function wrapper(plugin_info) {
         return `https://uri.amap.com/marker?position=${lng},${lat}&name=${portalName}&src=IITC-Mobile&coordinate=wgs84&callnative=1`
     }
 
-    function generateIntelLink(lat, lng, portalName) {
-        return `https://intel.ingress.com/intel?pll=${lat},${lng}`
-    }
-
     window.plugin.autoNaviLink.appendAutoNaviLink = function () {
         let div = $("<div>")
 
@@ -59,15 +55,10 @@ function wrapper(plugin_info) {
                 let url = new URL(primeLink)
                 ofl = url.searchParams.get("ofl")
             } catch (error) {
-                ofl = ""
             }
 
-            const regex = /https:\/\/intel\.ingress\.com\/intel\?pll=(?<lat>[\d\.\-]+),(?<lng>[\d\.\-]+)/g;
-            let m = regex.exec(ofl);
-            if (m !== null) {
-                let group = m.groups
-                let intel = generateIntelLink(group.lat, group.lng)
-                window.open(intel, "_self")
+            if (typeof ofl === "string" && ofl.length > 0) {
+                window.open(ofl, "_self")
             } else {
                 alert("链接解析失败")
             }
