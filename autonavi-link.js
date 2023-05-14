@@ -40,38 +40,39 @@ function wrapper(plugin_info) {
         return `https://uri.amap.com/marker?position=${lng},${lat}&name=${portalName}&src=IITC-Mobile&coordinate=wgs84&callnative=1`
     }
 
+    function generateIntelLink(lat, lng, portalName) {
+        return `https://intel.ingress.com/intel?pll=${lat},${lng}`
+    }
+
     window.plugin.autoNaviLink.appendAutoNaviLink = function () {
         let div = $("<div>")
 
-        var autoNaviLink = $('<a>').attr({ id: 'autonavi-link' }).text("[高德地图]")
+        var autoNaviLink = $('<a>').attr({ id: 'autonavi-link' }).text("高德地图")
         div.append(autoNaviLink)
 
-        div.append($("<span>").text(" "))
+        div.append($("<span>").text("|"))
 
-        let primeParser = $("<a>").attr({ id: "autonavi-prime" }).text("[解析游戏内链接]").click((evt) => {
-            let primeLink = prompt("Enter Prime Link")
-            let url = new URL(primeLink)
-            let ofl = url.searchParams.get("ofl")
+        let primeParser = $("<a>").attr({ id: "prime-link" }).text("输入游戏内链接").click((evt) => {
+            let primeLink = prompt("输入游戏内链接")
+            let ofl
+            try {
+                let url = new URL(primeLink)
+                ofl = url.searchParams.get("ofl")
+            } catch (error) {
+                ofl = ""
+            }
 
             const regex = /https:\/\/intel\.ingress\.com\/intel\?pll=(?<lat>[\d\.\-]+),(?<lng>[\d\.\-]+)/g;
             let m = regex.exec(ofl);
             if (m !== null) {
                 let group = m.groups
-                let link = generateAutoNaviLink(group.lat, group.lng, "Prime")
-                $('#autonavi-prime-link').attr({
-                    href: encodeURI(link),
-                    target: "_blank",
-                })
-                alert("按钮已更新")
+                let intel = generateIntelLink(group.lat, group.lng)
+                window.open(intel, "_self")
             } else {
                 alert("链接解析失败")
             }
-            evt.stopPropagation();
         })
-        let primeResult = $("<a>").attr({ id: "autonavi-prime-link" }).text("[解析结果]")
         div.append(primeParser);
-        div.append($("<span>").text(" "))
-        div.append(primeResult)
 
         $('#resodetails').after(div);
 
