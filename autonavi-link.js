@@ -65,6 +65,10 @@ function wrapper(plugin_info) {
         })
         div.append(primeParser);
 
+        let deepPortalLinkDOM = $("<a>").attr({ id: "deep-portal-link" }).text("跳转游戏")
+        div.append($("<span>").text("|"))
+        div.append(deepPortalLinkDOM)
+
         $('#resodetails').after(div);
 
         window.plugin.autoNaviLink.updateAutoNaviLink();
@@ -80,6 +84,13 @@ function wrapper(plugin_info) {
 
         $('#autonavi-link').attr({
             href: encodeURI(link),
+            target: "_blank",
+        })
+
+        let guid = portal.options.guid
+        let deepPortalLink = `https://link.ingress.com/?link=https%3a%2f%2fintel.ingress.com%2fportal%2f${guid}&apn=com.nianticproject.ingress&isi=576505181&ibi=com.google.ingress&ifl=https%3a%2f%2fapps.apple.com%2fapp%2fingress%2fid576505181&ofl=https%3a%2f%2fintel.ingress.com%2fintel%3fpll%3d${ll.lat}%2c${ll.lng}`
+        $("#deep-portal-link").attr({
+            href: deepPortalLink,
             target: "_blank",
         })
     };
