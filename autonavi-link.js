@@ -58,7 +58,21 @@ function wrapper(plugin_info) {
             }
 
             if (typeof ofl === "string" && ofl.length > 0) {
-                window.open(ofl, "_self")
+                let pllLat
+                let pllLng
+                try {
+                    let pllUrl = new URL(ofl)
+                    let pll = pllUrl.searchParams.get("pll")
+                    let pllTokens = pll.split(",")
+                    pllLat = parseFloat(pllTokens[0])
+                    pllLng = parseFloat(pllTokens[1])
+                } catch (error) {
+                }
+                if (typeof pllLng === "number") {
+                    window.selectPortalByLatLng(pllLat, pllLng)
+                } else {
+                    window.open(ofl, "_self")
+                }
             } else {
                 alert("链接解析失败")
             }
