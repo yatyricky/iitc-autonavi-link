@@ -107,6 +107,12 @@ function wrapper(plugin_info) {
             href: deepPortalLink,
             target: "_blank",
         })
+
+        $(document).on("click", ".nickname", function (event) {
+            let nickName = $(this).text()
+            let profileDeepLink = `https://link.ingress.com/?link=https%3a%2f%2fintel.ingress.com%2fagent%2f${nickName}&apn=com.nianticproject.ingress&isi=576505181&ibi=com.google.ingress&ifl=https%3a%2f%2fapps.apple.com%2fapp%2fingress%2fid576505181&ofl=https%3a%2f%2fwww.ingress.com%2f`
+            alert(profileDeepLink)
+        });
     };
 
     window.plugin.autoNaviLink.setup = function () {
