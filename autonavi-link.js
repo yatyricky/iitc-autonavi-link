@@ -2,19 +2,15 @@
 // @id             iitc-plugin-autonavi-link@Nefinite
 // @name           IITC plugin: AutoNavi Map Link
 // @category       Portal Info
-// @version        0.0.1.20230513.2
+// @version        0.0.2.20240513
 // @namespace      https://github.com/jonatkins/ingress-intel-total-conversion
 // @updateURL      https://static.iitc.me/build/release/plugins/autonavi-link.meta.js
 // @downloadURL    https://static.iitc.me/build/release/plugins/autonavi-link.user.js
-// @description    [iitc-2023-05-13-1] Link to AutoNavi Map
-// @include        https://*.ingress.com/intel*
-// @include        http://*.ingress.com/intel*
-// @match          https://*.ingress.com/intel*
-// @match          http://*.ingress.com/intel*
-// @include        https://*.ingress.com/mission/*
-// @include        http://*.ingress.com/mission/*
-// @match          https://*.ingress.com/mission/*
-// @match          http://*.ingress.com/mission/*
+// @description    [iitc-2024-05-13] Link to AutoNavi Map
+// @match          https://intel.ingress.com/*
+// @match          https://intel-x.ingress.com/*
+// @icon           https://iitc.app/extras/plugin-icons/basemap-gaode.png
+// @icon64         https://iitc.app/extras/plugin-icons/basemap-gaode-64.png
 // @grant          none
 // ==/UserScript==
 
@@ -26,7 +22,7 @@ function wrapper(plugin_info) {
     //PLUGIN AUTHORS: writing a plugin outside of the IITC build environment? if so, delete these lines!!
     //(leaving them in place might break the 'About IITC' page or break update checks)
     plugin_info.buildName = 'iitc';
-    plugin_info.dateTimeVersion = '20230513.2';
+    plugin_info.dateTimeVersion = '20240513';
     plugin_info.pluginId = 'autonavi-link';
     //END PLUGIN AUTHORS NOTE
 
@@ -45,42 +41,9 @@ function wrapper(plugin_info) {
 
         var autoNaviLink = $('<a>').attr({ id: 'autonavi-link' }).text("高德地图")
         div.append(autoNaviLink)
-
         div.append($("<span>").text("|"))
-
-        let primeParser = $("<a>").attr({ id: "prime-link" }).text("输入游戏内链接").click((evt) => {
-            let primeLink = prompt("输入游戏内链接")
-            let ofl
-            try {
-                let url = new URL(primeLink)
-                ofl = url.searchParams.get("ofl")
-            } catch (error) {
-            }
-
-            if (typeof ofl === "string" && ofl.length > 0) {
-                let pllLat
-                let pllLng
-                try {
-                    let pllUrl = new URL(ofl)
-                    let pll = pllUrl.searchParams.get("pll")
-                    let pllTokens = pll.split(",")
-                    pllLat = parseFloat(pllTokens[0])
-                    pllLng = parseFloat(pllTokens[1])
-                } catch (error) {
-                }
-                if (typeof pllLng === "number") {
-                    window.selectPortalByLatLng(pllLat, pllLng)
-                } else {
-                    window.open(ofl, "_self")
-                }
-            } else {
-                alert("链接解析失败")
-            }
-        })
-        div.append(primeParser);
 
         let deepPortalLinkDOM = $("<a>").attr({ id: "deep-portal-link" }).text("跳转游戏")
-        div.append($("<span>").text("|"))
         div.append(deepPortalLinkDOM)
 
         $('#resodetails').after(div);
@@ -115,8 +78,39 @@ function wrapper(plugin_info) {
         });
     };
 
+    window.plugin.autoNaviLink.inputPrimeLink = function () {
+        let primeLink = prompt("输入游戏内链接")
+        let ofl
+        try {
+            let url = new URL(primeLink)
+            ofl = url.searchParams.get("ofl")
+        } catch (error) {
+        }
+
+        if (typeof ofl === "string" && ofl.length > 0) {
+            let pllLat
+            let pllLng
+            try {
+                let pllUrl = new URL(ofl)
+                let pll = pllUrl.searchParams.get("pll")
+                let pllTokens = pll.split(",")
+                pllLat = parseFloat(pllTokens[0])
+                pllLng = parseFloat(pllTokens[1])
+            } catch (error) {
+            }
+            if (typeof pllLng === "number") {
+                window.selectPortalByLatLng(pllLat, pllLng)
+            } else {
+                window.open(ofl, "_self")
+            }
+        } else {
+            alert("链接解析失败")
+        }
+    }
+
     window.plugin.autoNaviLink.setup = function () {
         addHook('portalDetailsUpdated', window.plugin.autoNaviLink.appendAutoNaviLink);
+        $('#toolbox').append('<a onclick="window.plugin.autoNaviLink.inputPrimeLink();return false;">输入游戏内链接</a>');
     };
 
     var setup = window.plugin.autoNaviLink.setup;
